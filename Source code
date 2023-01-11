@@ -1,0 +1,85 @@
+#Standard
+import sys
+import os
+import webbrowser
+#pip installed
+import wikipedia
+import datetime
+import speech_recognition as sr
+import pyttsx3
+import pyaudio
+
+# Allocating voice_recognition ability to pa
+pa = pyttsx3.init('sapi5') #---> sapi5 is a microsoft API, used for speech recognition and synthesis
+
+# Giving voice to pa
+# extracting all voices into pa
+voices = pa.getProperty('voices')
+# setting up a specific voice to pa ---> voices[0] or voices[1], etc
+pa.setProperty('voices', voices[0].id)
+
+# defining the speaking ability of pa, so that it can talk out with sound
+def Say(words):
+    pa.say(words)
+    pa.runAndWait()
+
+def Greet(datetime):
+    hour = datetime.datetime.now().hour
+    if hour>=0 and hour<12:
+        Say('Morning Migo!')
+    elif hour>=12 and hour<17:
+        Say('Afternoon Amigo!')
+    else:
+        Say('Good Evening, Easter Bunny')
+    Say('Your P A is here. How can i help you?')
+
+def Search():
+    # listening the audio
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print('Listening...')
+        r.pause_threshold = 1
+        audio = r.listen(source)
+    print('Analyzing...')
+    # Recognizing the audio
+    try:
+        query = r.recognize_google(audio,language = 'en=in')
+        #if query == 'stop':
+        #    return None
+        #else:
+        #rocognize google is a google API which produces text from the audio
+        Say('You said')
+        print(query)
+        Say(query)
+        return query
+    except Exception as e:
+        print(e)
+        Say('Can you please repeat it.')
+        return Search()
+
+Greet(datetime)
+query = Search().lower()
+if 'wikipedia' in query:
+        Say('Searching wikipedia please wait')
+        query = query.replace('wikipedia','')
+        result = wikipedia.summary(query, sentences = 2)
+        print(result)
+        Say(result)
+elif 'youtube' in query:
+        Say('Opening Youtube.com')
+        webbrowser.open('youtube.com')
+elif 'atom' in query:
+        os.startfile(r'C:\Users\DELL\AppData\Local\atom\atom.exe')
+elif 'time' in query:
+        time = datetime.datetime.now().strftime("%H:%M:%S")
+        month = datetime.datetime.now().strftime("%h:%m")
+        print(time)
+        print(month)
+        Say(f"Now the time is {time} and it is {month}")
+        #Say(f"....{strTime}...")
+elif 'search' in query:
+    query = query.replace('search', '')
+    Say(f'Searching for {query}')
+    result = webbrowser.open(f'https://www.google.com/search?q={query}')
+elif 'bye' or 'thanks' in query:
+        Say("Hope to see you soon amigo")
